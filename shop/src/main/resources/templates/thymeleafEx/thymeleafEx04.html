@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+    <h1>상품 리스트 출력예제</h1>
+
+    <table border="1">
+        <thead>
+        <tr>
+            <td>순번</td>
+            <td>상품명</td>
+            <td>상품설명</td>
+            <td>가격</td>
+            <td>상품등록일</td>
+        </tr>
+        </thead>
+        <tbody>
+            <tr th:each="itemDto, status: ${itemDtoList}">
+                <!--status에는 현재 반복에 대한 정보가 존재함/인덱스가 짝수일때 status.even은 ture가됨 -->
+<!--                <td th:if="${status.even}" th:text="짝수"></td>-->
+                <!--마찬가지로 인덱스가 false가 되면 status.even이 홀수 출력해줌-->
+<!--                <td th:unless="${status.even}" th:text="홀수"></td> -->
+
+                <!--switch를 사용하여 홀수인지 짝수인지 출력하게 하는것-->
+                <td th:switch="${status.even}">
+                    <span th:case="true">짝수</span>
+                    <span th:case="false">홀수</span>
+                </td>
+
+                <td th:text="${itemDto.itemNm}"></td>
+                <td th:text="${itemDto.itemDetail}"></td>
+                <td th:text="${itemDto.price}"></td>
+                <td th:text="${itemDto.regTime}"></td>
+            </tr>
+        </tbody>
+    </table>
+
+</body>
+</html>
