@@ -31,6 +31,7 @@
 
     <!--    <div th:replace="fragments/footer::footer"></div>-->
     <div th:replace="~{fragments/footer::footer}"></div>
+
     <!--두개의 차이점-->
     <!--위의 경우,
     첫 번째 코드인 <div th:replace="fragments/footer::footer"></div>는
@@ -40,3 +41,10 @@
 
 </body>
 </html>
+
+<!--
+
+※ 만약 css가 실행이 안되는 경우(복사 붙이기로 했는데)
+1. pom.xml에 타임리프 라이브러리가 들어갔는지 확인
+2. header, footer에 써져잇는 경로를 삭제하고 다시한번 쳐서 입력해줄것 -> 전의 작성자가 지정해놓은 경로를 톰캣이 인식못하는것
+-->

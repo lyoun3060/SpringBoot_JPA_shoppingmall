@@ -15,11 +15,11 @@ public class CartItem {
     @Column(name="cart_item_id")
     private long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="cart_id")
     private Cart cart;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="item_id")
     private Item item;  //장바구니에 담을 상품의 정보를 알아야 하
 

@@ -19,7 +19,7 @@ public class Order {
     @Column(name = "order_id")
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     //한명의 회원은 여러 번 주문을 할 수 있으믈 주문 엔티티 기준에서 다대일 단방향 매핑이 필요함
     private Member member;
@@ -34,9 +34,12 @@ public class Order {
     //외래키가 order_item테이블에 있으므로 연관관계의 주인은 OrderItem 엔티티
     //Order엔티티가 주인이 아니므로 "mappedBy"속성으로 연관 관계의 주인을 설정
     //mappedBy 속성은 양방향 연관 관계에서 한 쪽 엔티티의 필드가 다른 쪽 엔티티와 어떻게 연결되어 있는지를 지정하는 역할
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL) //<-부모 엔티티의 영속성 상태 변화를 자식 엔티티에 모두 전이하는 CascadeType All을 사용
-    //하나의 주문이 여러개의 주문 상품을 갖을수 있도록 List자료형을 사용해서 매핑
-    private List<OrderItem> orderItems = new ArrayList<>();
+
+    @OneToMany(mappedBy = "order",
+            cascade = CascadeType.ALL, //<-부모 엔티티의 영속성 상태 변화를 자식 엔티티에 모두 전이하는 CascadeType All을 사용
+            orphanRemoval = true, //이 옵션이 true로 설정되면, 부모 엔티티와 연관된 자식 엔티티가 더 이상 부모와 연관되지 않을 때 자동으로 삭제되는 것
+            fetch = FetchType.LAZY)
+    private List<OrderItem> orderItems = new ArrayList<>(); //하나의 주문이 여러개의 주문 상품을 갖을수 있도록 List자료형을 사용해서 매핑
 
     private LocalDateTime regTime;
 
