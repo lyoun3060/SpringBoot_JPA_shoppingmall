@@ -62,6 +62,48 @@
     Q타입 클래스는 QueryDSL의 쿼리 작성에 사용되며, 엔티티 클래스의 필드를 자동으로 매핑하여 제공
     Q가 붙는 클래스들을 자동으로 생성을 해주기 위하여 플러그인 및 의존성 기능사용 
     ㄴ> 메이븐 컴파일러 실행필요 = 의존성이 추가됨
+    ------------------------------------------------------------------------------------------------------------------
+    #fetchResult(), fetchCount()
+
+    Querydsl 5.0부터 fetchResult()와 fetchCount()가 deprecated 됨
+    사유는 모든 dialect에서 QueryResults로 count 쿼리를 날리는 것이 완벽하게 지원되지 않기 때문
+    QueryResults<Item> resluts = queryFactory~~ -> List<Item> content = queryFactory~~
+    fetchResults() -> fetch()
+    fetchCount() -> fetch().size()
+
+    (변경전-예시)
+    @Override
+    public Page<Item> getAdminItemPage(ItemSearchDto itemSearchDto, Pageable pageable){
+        QueryResults<Item> results = queryFactory
+                .selectFrom(QItem.item)
+                .where(regDtsAfter(itemSearchDto.getSearchDateType()),
+                        searchSellStatusEq(itemSearchDto.getSearchSellStatus()),
+                        searchByLike(itemSearchDto.getSearchBy(), itemSearchDto.getSearchQuery()))
+                .orderBy(QItem.item.id.desc())
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetchResults();
+
+        List<Item> content = results.getResults();
+        long total = results.getTotal();
+        return new PageImpl<>(content, pageable, total);
+    }
+
+    (변경후-예시)
+    @Override
+    public Page<Item> getAdminItemPage(ItemSearchDto itemSearchDto, Pageable pageable){
+        List<Item> content = queryFactory
+                .selectFrom(QItem.item)
+                .where(regDtsAfter(itemSearchDto.getSearchDateType()),
+                        searchSellStatusEq(itemSearchDto.getSearchSellStatus()),
+                        searchByLike(itemSearchDto.getSearchBy(), itemSearchDto.getSearchQuery()))
+                .orderBy(QItem.item.id.desc())
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        return new PageImpl<>(content, pageable, content.size());
+    }
 
     
 
