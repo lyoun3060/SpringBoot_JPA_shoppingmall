@@ -65,21 +65,28 @@ public class ItemController {
     }
 
     @GetMapping(value = "/item/{itemId}")
+    public String itemDtl(Model model, @PathVariable("itemId") Long itemId){
+        ItemFormDto itemFormDto = itemService.getItemDtl(itemId);
+        model.addAttribute("item", itemFormDto);
+        return "item/itemDtl";
+    }
+
+
+    @GetMapping(value = "/admin/item/{itemId}")
     public String itemDtl(@PathVariable("itemId") Long itemId, Model model){
 
-        try{
+        try {
             //조회한 상품 데이터를 모델에 담아서 뷰로 전달
             ItemFormDto itemFormDto = itemService.getItemDtl(itemId);
-            model.addAttribute("item", itemFormDto);
-        }
-        //상품엔티티가 존재하지 않을 경우, 에러메세지를 담아 상품등록페이지로 이동
-        catch (EntityNotFoundException e){
-            model.addAttribute("errorMessage","존재하지 않는 상품입니다.");
+            model.addAttribute("itemFormDto", itemFormDto);
+            //상품엔티티가 존재하지 않을 경우, 에러메세지를 담아 상품등록페이지로 이동
+        } catch(EntityNotFoundException e){
+            model.addAttribute("errorMessage", "존재하지 않는 상품 입니다.");
             model.addAttribute("itemFormDto", new ItemFormDto());
             return "item/itemForm";
         }
 
-        return "item/itemDtl";
+        return "item/itemForm";
     }
 
     @PostMapping(value = "/admin/item/{itemId}") //상품을 수정하는 url을 추가, 상품 등록 때와 거의 비슷

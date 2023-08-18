@@ -44,4 +44,36 @@ public class Order {
     private LocalDateTime regTime;
 
     private LocalDateTime updateTime;
+
+
+    //생성한 주문 상품 객체를 이용하여 주문 객체를 만드는 메소드
+    public  void addOrderItem(OrderItem orderItem){
+
+        //orderItems에는 주문 상품 정보들을 담아줄것(orderItem객체를 order객체에 orderItems에 추가)
+        orderItems.add(orderItem);
+        //Order엔티티와 OrderItem엔티티가 양방향 참조 관계이므로, orderItem객체에도 order객체를 세팅해야함
+        orderItem.setOrder(this);
+    }
+
+    public static Order createOrder(Member member, List<OrderItem> orderItemList){
+        Order order = new Order();
+        //상품을 주문한 회원의 정보를 세팅
+        order.setMember(member);
+        //상품 페이지에서는 1개의 상품을 주문하지만, 장바구니에서는 한번에 여러개의 상품을 주문할 수 있다.
+        //따라서 여러 개의 주문 상품을 담을 수 잇도록 리스트 형태로 파라미터값을 받아, 주문 객체에 orderItem객체를 추가
+        for(OrderItem orderItem : orderItemList){
+            order.addOrderItem(orderItem);
+        }
+        order.setOrderStatus(OrderStatus.ORDER); //<- 주문상태를 ORDER로 세팅
+        order.setOrderDate(LocalDateTime.now()); //<- 현재 시간을 주문시간으로 세팅
+        return order;
+    }
+
+    public  int getTotalPrice(){
+        int totalPrice = 0;
+        for(OrderItem orderItem : orderItems){
+            totalPrice += orderItem.getTotalPrice();
+        }
+        return totalPrice;
+    }
 }
