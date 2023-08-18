@@ -39,4 +39,5 @@ public interface ItemRepository extends JpaRepository<Item, Long>, QuerydslPredi
     List<Item> findByItemDetailByNative(@Param("itemDetail") String itemDetail);
 
 
+
 }

@@ -49,7 +49,7 @@
     View: 데이터를 시각적으로 표현하는 역할을 합니다. 다양한 뷰 템플릿 엔진을 지원
 
     ------------------------------------------------------------------------------------------------------------------
-    ※Querydsl(2023-08-15)
+    ※ Querydsl(2023-08-15)
     @Query어노테이션을 이용하는 경우,JPQL(객체지향쿼리문-jpa에서 사용)을 사용하는데,
     이경우 sql문을 문자열(쿼리문)로 입력하기에 잘못입력해도 컴파일시 에러를 발견 할 수 없음
     Querydsl를 사용하면 쿼리문이 아닌 코드로 작성하여 컴파일러의 도움을 받을 수 있음
@@ -63,7 +63,7 @@
     Q가 붙는 클래스들을 자동으로 생성을 해주기 위하여 플러그인 및 의존성 기능사용 
     ㄴ> 메이븐 컴파일러 실행필요 = 의존성이 추가됨
     ------------------------------------------------------------------------------------------------------------------
-    #fetchResult(), fetchCount()
+    ※ fetchResult(), fetchCount()(2023-08-18)
 
     Querydsl 5.0부터 fetchResult()와 fetchCount()가 deprecated 됨
     사유는 모든 dialect에서 QueryResults로 count 쿼리를 날리는 것이 완벽하게 지원되지 않기 때문
@@ -101,12 +101,77 @@
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
+        
+        //(방법1)
+        //조회한 데이터를 Page클래스의 구현체인 PageImpl객체로 반환
+        // content.size()는 현재 페이지에 있는 데이터의 개수를 나타냄
+        /*return new PageImpl<>(content, pageable, content.size());*/
 
-        return new PageImpl<>(content, pageable, content.size());
+        //(방법2)
+        long total = queryFactory.select(Wildcard.count).from(QItem.item)
+                .where(regDtsAfter(itemSearchDto.getSearchDateType()),
+                        searchSellStatusEq(itemSearchDto.getSearchSellStatus()),
+                        searchByLike(itemSearchDto.getSearchBy(), itemSearchDto.getSearchQuery()))
+                .fetchOne()
+                ;
+
+        return new PageImpl<>(content, pageable, total);
+
+        /*
+        * 방법1과 방법2의 차이
+        * (2)의 코드는 QueryDSL을 사용하여 DB에서 실제로 전체 아이템 수(total)를 조회하는 방식.
+        *  Wildcard.count를 사용하여 SELECT 쿼리를 생성하고, fetchOne()을 호출하여 전체 아이템 수를 가져옴.
+        *  이 방식은 실제 데이터베이스에서 전체 아이템 수를 가져오기 때문에 정확한 값을 반환.
+        * (1)의 코드는 (2)의 방식과 달리 이미 페이지네이션된 콘텐츠(List<MainItemDto> content)의 크기를 사용하여 전체 아이템 수(total)를 구함.
+        *  이 방식은 이미 쿼리를 실행하여 가져온 결과를 사용하므로 별도의 쿼리 실행 없이 처리됨. 그러나 페이지 크기가 클 경우에는 조금 부정확할 수 있을 수 있음.
+        */
+    }
+    ------------------------------------------------------------------------------------------------------------------
+    ※ @Querydsl과 @QueryProjection의 차이(2023-08-19)
+
+    (요것)
+    @Querydsl은 동적 쿼리 작성과 실행에 유용하며,
+    @QueryProjection은 프로젝션 결과를 DTO로 변환하는 과정을 간단하게 처리해주는 역할
+
+    1.@Querydsl
+    @Querydsl 애노테이션은 QueryDSL을 사용하여 동적 쿼리를 작성할 때 메서드에 적용
+    QueryDSL은 타입 안전한 쿼리 작성을 가능하게 해주는 라이브러리로, JPA 쿼리를 자바 코드로 작성하고 실행할 수 있도록 도와줌
+    @Querydsl을 사용하여 메서드에 적용하면 해당 메서드의 파라미터를 활용하여 QueryDSL을 활용한 쿼리를 작성할 수 있음
+    
+    예)
+    public class ItemRepositoryImpl implements ItemCustomRepository {
+
+    @Override
+    public List<Item> searchItems(String keyword) {
+        QItem item = QItem.item;
+        BooleanExpression keywordCondition = item.itemName.contains(keyword);
+
+        return new JPAQuery<>(entityManager)
+                .selectFrom(item)
+                .where(keywordCondition)
+                .fetch();
+        }
     }
 
-    
+    2.@QueryProjection
+    @QueryProjection은 QueryDSL에서 사용됨
+    생성자에 @QueryProjection 애노테이션을 붙여서 해당 생성자를 QueryDSL 프로젝션에 활용할 수 있음.
+    QueryDSL 프로젝션은 DTO로 데이터를 변환하거나 원하는 필드만 선택해서 가져오는 작업에 사용됨
+    @QueryProjection을 사용하면 QueryDSL이 컴파일 시간에 생성한 Q타입과 함께 사용하여 쿼리의 프로젝션을 처리할 수 있음.
 
-    
+    예)
+    public class ItemDto {
+
+    private Long id;
+    private String itemName;
+
+    @QueryProjection
+    public ItemDto(Long id, String itemName) {
+        this.id = id;
+        this.itemName = itemName;
+        }
+
+    // Getters and setters
+    }
 
     
