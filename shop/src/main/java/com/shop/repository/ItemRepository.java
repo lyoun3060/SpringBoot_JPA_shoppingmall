@@ -8,7 +8,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface ItemRepository extends JpaRepository<Item, Long>, QuerydslPredicateExecutor<Item> {
+public interface ItemRepository extends JpaRepository<Item, Long>, QuerydslPredicateExecutor<Item>, ItemRepositoryCustom {
                                         //Predicate는 JPA 엔티티의 필드들을 조합하여 동적인 쿼리 조건을 표현하는 객체
                                         //QuerydslPredicateExecutor는 메소드 이름 규칙을 기반으로 쿼리 조건을 자동으로 생성합니다.
                                         //예를 들어, 메소드 이름에 "findBy"를 포함하고 필드명을 지정하면, 해당 필드를 기준으로 동적인 쿼리를 생성.
@@ -37,4 +37,6 @@ public interface ItemRepository extends JpaRepository<Item, Long>, QuerydslPredi
     //JPQL의 @Query-nativeQuery속성 사용
     @Query(value = "select * from item i where i.item_Detail like %:itemDetail% order by i.price desc", nativeQuery = true)
     List<Item> findByItemDetailByNative(@Param("itemDetail") String itemDetail);
+
+
 }
