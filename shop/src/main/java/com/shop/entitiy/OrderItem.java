@@ -46,6 +46,11 @@ public class OrderItem extends BaseEntity{
         return orderPrice*count;
     }
 
+
+    public void cancel(){
+        this.getItem().addStock(count);
+    }
+
 /*BaseEntity를 상속받기 때문에 중복되서 필요없음
     private LocalDateTime regTime;
 
