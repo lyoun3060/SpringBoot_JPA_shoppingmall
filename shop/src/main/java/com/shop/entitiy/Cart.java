@@ -22,4 +22,12 @@ public class Cart {
     @JoinColumn(name="member_id")
     private Member member;
 
+
+    //회원 한명당 1개의 장바구니
+    //장바구니 엔티티를 생성
+    public static Cart createCart(Member member){
+        Cart cart = new Cart();
+        cart.setMember(member);
+        return cart;
+    }
 }
